@@ -72,16 +72,18 @@ void initializeMemory(vector<memory> &memoryVector)
 {
 	memory m;
 	m.empty = true;
+	m.isRoot = true;
 	m.size = 1024;
 	m.start = 0;
 	m.end = m.size - 1;
-	memoryVector.push_back(m);
+	memoryVector[0] = m;
 }
-bool assignMemory(process &p,vector<memory> &memoryVector)
+bool assignMemory(process &p,vector<memory> &memoryVector,int index)
 {
+	int minMemoryIndex = index;
 	int requiredMemory = nextPowerOf2(p.memSize + 6);
 	//1- Loop to find if there is a place in the memory which matches the required space
-	for (int i = 0; i < memoryVector.size(); i++)
+	for (int i = index; i < memoryVector.size(); i++)
 	{
 		if (memoryVector[i].size == requiredMemory && memoryVector[i].empty)
 		{
@@ -89,10 +91,18 @@ bool assignMemory(process &p,vector<memory> &memoryVector)
 			memoryVector[i].empty = false;
 			return true;
 		}
+		if (memoryVector[i].size > requiredMemory && memoryVector[i].empty && memoryVector[minMemoryIndex].size > memoryVector[i].size)
+		{
+			minMemoryIndex = i;
+		}
+		if (memoryVector[i].size < requiredMemory)
+		{
+			break;
+		}
 	}
 	//2- If there is no place in the memory which is equal to the desired one then create one
-	int i = 0;
-	while (memoryVector[i].size >= requiredMemory && memoryVector[i].empty)
+	int i = minMemoryIndex;
+	while (memoryVector[i].size > requiredMemory && memoryVector[i].empty && i < memoryVector.size())
 	{
 		memory m1,m2;
 		m1.size = m2.size = memoryVector[i].size / 2;
@@ -103,15 +113,36 @@ bool assignMemory(process &p,vector<memory> &memoryVector)
 		m2.end = memoryVector[i].end;
 		memoryVector[2 * i + 1] = m1;
 		memoryVector[2 * i + 2] = m2;
-		if (assignMemory(p, memoryVector))
+		if (assignMemory(p, memoryVector, 2 * i + 1))
 			return true;
 		i++;
 	}
+	p.back++;
 	return false;
 }
-void unAssignMemory(process p)
+void unAssignMemory(int memIndex, vector<memory> &memoryVector)
 {
-
+	if (memIndex == 0)
+		return;
+	int parentIndex;
+	if (memIndex % 2 == 0)
+	{
+		parentIndex = (memIndex - 2) / 2;
+		if (memoryVector[2 * parentIndex + 1].empty)
+		{
+			memoryVector[parentIndex].empty = true;
+			unAssignMemory(parentIndex, memoryVector);
+		}
+	}
+	else
+	{
+		parentIndex = (memIndex - 1) / 2;
+		if (memoryVector[2 * parentIndex + 2].empty)
+		{
+			memoryVector[parentIndex].empty = true;
+			unAssignMemory(parentIndex, memoryVector);
+		}
+	}
 }
 int nextPowerOf2(int n)
 {
@@ -124,12 +155,12 @@ int nextPowerOf2(int n)
 
 	return p;
 }
-void runProcess(deque<process> &processQueue, bool&switching, int &currentProcessQuantum, int quantum)
+void runProcess(deque<process> &processQueue, vector<memory> &memoryVector,bool&switching, int &currentProcessQuantum, int quantum)
 {
 	processQueue.front().remTime--;
 	if (processQueue.front().remTime == 0)
 	{
-		unAssignMemory(processQueue.front());
+		unAssignMemory(processQueue.front().memIndex,memoryVector);
 		switching = true;
 	}
 	currentProcessQuantum--;

@@ -11,6 +11,7 @@ struct memory
 	int end;
 	int size;
 	bool empty;
+	bool isRoot = false;
 };
 
 struct process 
@@ -28,7 +29,7 @@ struct process
 vector <process> readProcess(int &Quantum, int &switchTime);
 process buildProcess(string line);
 void initializeMemory(vector<memory> &memoryVector);
-bool assignMemory(process &p,vector<memory> &memoryVector);
-void unAssignMemory(process p);
-void runProcess(deque<process> &processQueue, bool&switching, int &currentProcessQuantum,int quantum);
+bool assignMemory(process &p,vector<memory> &memoryVector,int index);
+void unAssignMemory(int memIndex, vector<memory> &memoryVector);
+void runProcess(deque<process> &processQueue, vector<memory> &memoryVector, bool&switching, int &currentProcessQuantum,int quantum);
 int nextPowerOf2(int n);

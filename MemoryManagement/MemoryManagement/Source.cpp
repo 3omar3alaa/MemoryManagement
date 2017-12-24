@@ -5,10 +5,11 @@
 using namespace std;
 
 vector<process> processVector;
-vector<memory> memoryVector;
+vector<memory> memoryVector(10000);
 deque <process> processQueue;
 int main()
 {
+	//memoryVector.reserve(10000);
 	int quantum, switchTime, clk = 0;
 	processVector = readProcess(quantum, switchTime);
 	initializeMemory(memoryVector);
@@ -22,9 +23,9 @@ int main()
 		{
 			if (processQueue.front().memIndex == -1)
 			{
-				if (assignMemory(processQueue.front(),memoryVector))
+				if (assignMemory(processQueue.front(),memoryVector,0))
 				{
-					runProcess(processQueue, switching, currentProcessQuantum,  quantum);
+					runProcess(processQueue, memoryVector,switching, currentProcessQuantum,  quantum);
 				}
 				else
 				{
@@ -33,7 +34,7 @@ int main()
 			}
 			else
 			{
-				runProcess(processQueue, switching, currentProcessQuantum, quantum);
+				runProcess(processQueue, memoryVector, switching, currentProcessQuantum, quantum);
 			}
 		}
 		//2- Check for any arrival of process
@@ -41,7 +42,7 @@ int main()
 		{
 			processQueue.push_back(processVector.front());
 			processVector.erase(processVector.begin());
-			if (!assignMemory(processQueue.front(), memoryVector))
+			if (!assignMemory(processQueue.front(), memoryVector,0))
 			{
 				processQueue.push_back(processQueue.front());
 				processQueue.pop_front();
