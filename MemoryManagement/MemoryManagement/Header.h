@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <queue>
 using namespace std;
 #pragma once
 
@@ -27,3 +28,7 @@ struct process
 vector <process> readProcess(int &Quantum, int &switchTime);
 process buildProcess(string line);
 void initializeMemory(vector<memory> &memoryVector);
+bool assignMemory(process &p,vector<memory> &memoryVector);
+void unAssignMemory(process p);
+void runProcess(deque<process> &processQueue, bool&switching, int &currentProcessQuantum,int quantum);
+int nextPowerOf2(int n);
