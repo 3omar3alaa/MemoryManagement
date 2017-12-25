@@ -166,7 +166,8 @@ void runProcess(deque<process> &processQueue, vector<memory> &memoryVector,bool&
 	if (processQueue.front().remTime > 0 && currentProcessQuantum > 0)
 	{
 		processQueue.front().remTime--;
-		currentProcessQuantum--;
+		if(processQueue.size() > 1)
+			currentProcessQuantum--;
 	}
 	else if (processQueue.front().remTime == 0)
 	{
