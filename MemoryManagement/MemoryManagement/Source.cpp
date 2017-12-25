@@ -16,43 +16,59 @@ int main()
 	bool switching = false;
 	int currentProcessQuantum = quantum;
 	int currentSwitchTime = switchTime;
-	while (processVector.size() != 0)
+	while (processVector.size() != 0 || processQueue.size() != 0)
 	{
-		//1- Check for current Process Queue if it has process & NOT switching now
-		if (processQueue.size() != 0 && !switching)
+		//1- Check for any arrival of process
+		while (processVector.size() > 0)
 		{
-			if (processQueue.front().memIndex == -1)
+			if (processVector.front().arrTime == clk)
 			{
-				if (assignMemory(processQueue.front(),memoryVector,0))
-				{
-					runProcess(processQueue, memoryVector,switching, currentProcessQuantum,  quantum);
-				}
-				else
-				{
-					cout << "process not assigned to memory address";
-				}
+				processQueue.push_back(processVector.front());
+				processVector.erase(processVector.begin());
+			}
+			else
+				break;
+		}
+		//2- Check for current Process Queue if it has process & NOT switching now
+		//Assign memory to process when it starts to run, not when it arrives
+		if (processQueue.size() != 0 && !switching )
+		{
+			if (processQueue.front().memIndex != -1)
+			{
+				runProcess(processQueue, memoryVector, switching, currentProcessQuantum, quantum, clk);
 			}
 			else
 			{
-				runProcess(processQueue, memoryVector, switching, currentProcessQuantum, quantum);
+				if (assignMemory(processQueue.front(), memoryVector, 0))
+				{
+					runProcess(processQueue, memoryVector, switching, currentProcessQuantum, quantum, clk);
+				}
+				else
+				{
+					if (processQueue.front().back <= 5)
+						processQueue.push_back(processQueue.front());
+					processQueue.pop_front();
+					cout << "process not assigned to memory address";
+				}
 			}
 		}
-		//2- Check for any arrival of process
-		while (processVector.front().arrTime == clk)
+	
+		else if (switching)
 		{
-			processQueue.push_back(processVector.front());
-			processVector.erase(processVector.begin());
-			if (!assignMemory(processQueue.front(), memoryVector,0))
+			if (currentSwitchTime == 0)
 			{
-				processQueue.push_back(processQueue.front());
-				processQueue.pop_front();
+				switching = false;
+				currentSwitchTime = switchTime;
 			}
-		}
-		if (switching)
-		{
-			currentSwitchTime--;
+			else
+			{
+				currentSwitchTime--;
+			}
 		}
 		clk++;
 	}
+	memoryVector.clear();
+	processQueue.clear();
+	processVector.clear();
 	return 0;
 }
