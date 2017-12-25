@@ -5,8 +5,8 @@
 using namespace std;
 #pragma once
 
-static int lastEventTime;
-static ofstream logEvent("log.txt");
+extern int lastEventTime;
+extern ofstream logEvent;
 
 struct memory
 {
@@ -36,8 +36,9 @@ bool assignMemory(process &p,vector<memory> &memoryVector,int index);
 void unAssignMemory(int memIndex, vector<memory> &memoryVector, bool check);
 void runProcess(deque<process> &processQueue, vector<memory> &memoryVector, bool&switching, int &currentProcessQuantum, int quantum, int clk);
 int nextPowerOf2(int n);
-void logProcessFinish(vector<memory> &memVector, deque<process> p, int clk);
-void logProcessStop(vector<memory> &memVector, deque<process> p, int clk);
-void printProcessQueue(deque<process> p);
+void logProcessFinish(vector<memory> &memVector, deque<process> &p, int clk);
+void logProcessStop(vector<memory> &memVector, deque<process> &p, int clk);
+void printProcessQueue(deque<process> &p);
 void logSwitching(int clk);
+void logNoMemorySpace(deque<process> &p);
 void getResult(vector<memory> &memVector);

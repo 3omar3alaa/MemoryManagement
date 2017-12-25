@@ -5,6 +5,9 @@
 #include <sstream>
 using namespace std;
 
+int lastEventTime;
+ofstream logEvent;
+
 vector<process> readProcess(int &Quantum, int &switchTime)
 {
 	vector <process> processVector;
@@ -199,7 +202,7 @@ void runProcess(deque<process> &processQueue, vector<memory> &memoryVector,bool&
 	}
 }
 
-void printProcessQueue(deque<process> p) {
+void printProcessQueue(deque<process> &p) {
 	logEvent << "Queue: ";
 	for (int i = 0; i < p.size(); i++) {
 		logEvent << p.at(i).id;
@@ -210,13 +213,13 @@ void printProcessQueue(deque<process> p) {
 	logEvent << endl;
 }
 
-void logProcessStop(vector<memory> &memVector, deque<process> p, int clk) {
+void logProcessStop(vector<memory> &memVector, deque<process> &p, int clk) {
 	logEvent << "Executing process " << p.front().id << "\t: started at " << lastEventTime
 		<< ", stopped at " << clk << ", "<< p.front().remTime <<" remaining, memory starts at " << memVector[p.front().memIndex].start
 		<< " and ends at " << memVector[p.front().memIndex].end << endl;
 }
 
-void logProcessFinish(vector<memory> &memVector, deque<process> p, int clk) {
+void logProcessFinish(vector<memory> &memVector, deque<process> &p, int clk) {
 	logEvent << "Executing process " << p.front().id << "\t: started at " << lastEventTime
 		<< ", finished at " << clk << ", memory starts at " << memVector[p.front().memIndex].start
 		<< " and ends at " << memVector[p.front().memIndex].end << endl;
@@ -251,4 +254,9 @@ void getResult(vector<memory> &memVector) {
 		out << memVector[forOutput[i].memIndex].end << "\n";
 	}
 	out.close();
+}
+
+void logNoMemorySpace(deque<process> &p) {
+	printProcessQueue(p);
+	logEvent << "No space for " << p.front().id << endl;
 }

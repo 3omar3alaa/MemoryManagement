@@ -10,6 +10,7 @@ vector<memory> memoryVector(10000);
 
 int main()
 {
+	logEvent = ofstream("log.txt");
 	//memoryVector.reserve(10000);
 	int quantum, switchTime, clk = 0;
 	processVector = readProcess(quantum, switchTime);
@@ -46,10 +47,13 @@ int main()
 				}
 				else
 				{
+					logNoMemorySpace(processQueue);
 					if (processQueue.front().back <= 5)
 						processQueue.push_back(processQueue.front());
-					processQueue.pop_front();
 					cout << "process not assigned to memory address";
+					processQueue.pop_front();					
+					switching = true;
+					lastEventTime = clk + 1;
 				}
 			}
 		}

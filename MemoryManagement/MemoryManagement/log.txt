@@ -1,0 +1,17 @@
+Queue: T1
+Executing process T1	: started at 0, stopped at 20, 20 remaining, memory starts at 0 and ends at 511
+Process switching	: started at 21, finished at 23
+Queue: T2, T3, T1
+Executing process T2	: started at 24, stopped at 44, 10 remaining, memory starts at 512 and ends at 767
+Process switching	: started at 45, finished at 47
+Queue: T3, T1, T2
+No space for T3
+Process switching	: started at 49, finished at 51
+Queue: T1, T2, T3
+Executing process T1	: started at 52, finished at 72, memory starts at 0 and ends at 511
+Process switching	: started at 73, finished at 75
+Queue: T2, T3
+Executing process T2	: started at 76, finished at 86, memory starts at 512 and ends at 767
+Process switching	: started at 87, finished at 89
+Queue: T3
+Executing process T3	: started at 90, finished at 100, memory starts at 0 and ends at 511
