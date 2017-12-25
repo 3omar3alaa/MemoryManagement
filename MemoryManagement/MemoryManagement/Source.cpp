@@ -5,8 +5,9 @@
 using namespace std;
 
 vector<process> processVector;
-vector<memory> memoryVector(10000);
 deque <process> processQueue;
+vector<memory> memoryVector(10000);
+
 int main()
 {
 	//memoryVector.reserve(10000);
@@ -57,6 +58,7 @@ int main()
 		{
 			if (currentSwitchTime == 0)
 			{
+				logSwitching(clk);
 				switching = false;
 				currentSwitchTime = switchTime;
 			}
@@ -67,8 +69,11 @@ int main()
 		}
 		clk++;
 	}
+	getResult(memoryVector);
 	memoryVector.clear();
 	processQueue.clear();
 	processVector.clear();
+	forOutput.clear();
+	logEvent.close();
 	return 0;
 }

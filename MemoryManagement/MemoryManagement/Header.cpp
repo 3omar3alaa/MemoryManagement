@@ -5,7 +5,6 @@
 #include <sstream>
 using namespace std;
 
-
 vector<process> readProcess(int &Quantum, int &switchTime)
 {
 	vector <process> processVector;
@@ -165,13 +164,22 @@ void runProcess(deque<process> &processQueue, vector<memory> &memoryVector,bool&
 {
 	if (processQueue.front().remTime > 0 && currentProcessQuantum > 0)
 	{
+		if (currentProcessQuantum == quantum) {
+			lastEventTime = clk;
+			//assuming printing queue at start of executing a process
+			printProcessQueue(processQueue);
+		}
+			
 		processQueue.front().remTime--;
-		if(processQueue.size() > 1)
-			currentProcessQuantum--;
+		currentProcessQuantum--;
 	}
 	else if (processQueue.front().remTime == 0)
 	{
+		logProcessFinish(memoryVector, processQueue, clk);
+		processQueue.front().finishTime = clk;
+		lastEventTime = clk + 1;
 		unAssignMemory(processQueue.front().memIndex, memoryVector,false);
+		forOutput.push_back(processQueue.front());
 		processQueue.pop_front();
 		currentProcessQuantum = quantum;
 		switching = true;
@@ -179,9 +187,68 @@ void runProcess(deque<process> &processQueue, vector<memory> &memoryVector,bool&
 	}
 	else
 	{
-		switching = true;
+		//assuming that we reset the quantum if no process in queue
 		currentProcessQuantum = quantum;
-		processQueue.push_back(processQueue.front());
-		processQueue.pop_front();
+		if (processQueue.size() > 1) {
+			logProcessStop(memoryVector, processQueue, clk);
+			lastEventTime = clk + 1;
+			switching = true;
+			processQueue.push_back(processQueue.front());
+			processQueue.pop_front();
+		}		
 	}
+}
+
+void printProcessQueue(deque<process> p) {
+	logEvent << "Queue: ";
+	for (int i = 0; i < p.size(); i++) {
+		logEvent << p.at(i).id;
+		if (i < p.size() - 1)
+			logEvent << ", ";
+	}
+
+	logEvent << endl;
+}
+
+void logProcessStop(vector<memory> &memVector, deque<process> p, int clk) {
+	logEvent << "Executing process " << p.front().id << "\t: started at " << lastEventTime
+		<< ", stopped at " << clk << ", "<< p.front().remTime <<" remaining, memory starts at " << memVector[p.front().memIndex].start
+		<< " and ends at " << memVector[p.front().memIndex].end << endl;
+}
+
+void logProcessFinish(vector<memory> &memVector, deque<process> p, int clk) {
+	logEvent << "Executing process " << p.front().id << "\t: started at " << lastEventTime
+		<< ", finished at " << clk << ", memory starts at " << memVector[p.front().memIndex].start
+		<< " and ends at " << memVector[p.front().memIndex].end << endl;
+}
+
+void logSwitching(int clk) {
+	logEvent << "Process switching\t: started at " << lastEventTime << ", finished at " << clk << endl;
+}
+
+
+bool sortProcessesById(process i, process j) { 
+	return i.id < j.id; 
+}
+
+void getResult(vector<memory> &memVector) {
+	sort(forOutput.begin(), forOutput.end(), sortProcessesById);
+	ofstream out("output.txt");
+	out << "process_id\t";
+	out << "run_time\t";
+	out << "arrival_time\t";
+	out << "finish_time\t";
+	out << "mem_size\t";
+	out << "mem_start\t";
+	out << "mem_end\n";
+	for (int i = 0; i < forOutput.size(); i++) {
+		out << forOutput[i].id << "\t";
+		out << forOutput[i].runTime << "\t";
+		out << forOutput[i].arrTime << "\t";
+		out << forOutput[i].finishTime << "\t";
+		out << forOutput[i].memSize << "\t";
+		out << memVector[forOutput[i].memIndex].start << "\t";
+		out << memVector[forOutput[i].memIndex].end << "\n";
+	}
+	out.close();
 }
